@@ -556,7 +556,7 @@ function mailSpec(){
   const subj=t.mailSubj+((D&&D.company)?D.company:'');
   let body=specText;
   if(body.length>1500) body=body.slice(0,1500)+t.mailCut;
-  location.href='mailto:do.ham@krst.co.kr,jy.lee@krst.co.kr?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  location.href='mailto:do.ham@krst.co.kr?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
 </script>
 </body>
