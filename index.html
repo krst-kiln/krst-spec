@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRST 열처리 설비 견적 사양 구성기 (프로토타입)</title>
+<style>
+  :root{
+    --navy:#1a2f4e; --navy2:#26436e; --accent:#c8912a; --bg:#f4f6f9;
+    --line:#d9dfe8; --txt:#22303f; --sub:#5c6b7c; --ok:#1d7a4f; --warn:#b3541e; --card:#ffffff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Segoe UI","Malgun Gothic","Yu Gothic",sans-serif; background:var(--bg); color:var(--txt); line-height:1.55;}
+  header{background:var(--navy); color:#fff; padding:22px 28px;}
+  header h1{font-size:20px; font-weight:600;}
+  header p{font-size:12.5px; opacity:.75; margin-top:4px;}
+  .wrap{max-width:960px; margin:0 auto; padding:24px 16px 80px;}
+  /* progress */
+  .steps{display:flex; gap:6px; margin-bottom:22px; flex-wrap:wrap;}
+  .steps .st{flex:1; min-width:100px; text-align:center; font-size:11.5px; padding:8px 4px; border-radius:6px;
+    background:#e6eaf1; color:var(--sub); border:1px solid var(--line); cursor:pointer; transition:.12s;}
+  .steps .st:hover{border-color:var(--navy2); color:var(--navy); background:#dde5f0;}
+  .steps .st.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .steps .st.active:hover{background:var(--navy); color:#fff;}
+  .steps .st.done{background:#dfe9e0; color:var(--ok); border-color:#bcd5c3;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:26px 28px; box-shadow:0 1px 3px rgba(20,35,60,.06);}
+  .card h2{font-size:17px; color:var(--navy); margin-bottom:4px;}
+  .card .desc{font-size:12.5px; color:var(--sub); margin-bottom:18px;}
+  fieldset{border:none; margin-bottom:18px;}
+  label.q{display:block; font-size:13.5px; font-weight:600; margin-bottom:7px;}
+  label.q .req{color:#c0392b; font-size:11px; margin-left:4px;}
+  label.q .hint{display:block; font-weight:400; font-size:11.5px; color:var(--sub); margin-top:2px;}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:6px; font-size:13.5px; background:#fff;}
+  input:focus, select:focus, textarea:focus{outline:2px solid #9db4d6;}
+  .opts{display:flex; flex-wrap:wrap; gap:8px;}
+  .opts label{border:1.5px solid var(--line); border-radius:8px; padding:10px 14px; font-size:13px; cursor:pointer;
+    background:#fff; transition:.12s; user-select:none;}
+  .opts label:hover{border-color:var(--navy2);}
+  .opts input{display:none;}
+  .opts label.sel{border-color:var(--navy); background:#eef2f8; font-weight:600;}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.row{grid-template-columns:1fr;}}
+  .note{font-size:12px; background:#fdf6e8; border:1px solid #ecd9ac; border-radius:6px; padding:10px 12px; margin-top:8px; color:#7a5b16;}
+  .note.info{background:#eaf1fb; border-color:#c4d5ee; color:#2c4a72;}
+  .btns{display:flex; justify-content:space-between; margin-top:26px;}
+  button{padding:11px 26px; font-size:14px; border-radius:7px; border:none; cursor:pointer; font-weight:600;}
+  .next{background:var(--navy); color:#fff;}
+  .next:hover{background:var(--navy2);}
+  .prev{background:#e3e8ef; color:var(--txt);}
+  .hidden{display:none;}
+  /* language toggle */
+  .langbar{display:flex; gap:6px; margin-bottom:16px;}
+  .langbar button{padding:7px 16px; font-size:12.5px; border-radius:20px; background:#e6eaf1; color:var(--sub); font-weight:600;}
+  .langbar button.on{background:var(--accent); color:#fff;}
+  /* result */
+  .res-block{border:1px solid var(--line); border-radius:8px; margin-bottom:16px; overflow:hidden;}
+  .res-block .hd{background:var(--navy); color:#fff; font-size:13.5px; font-weight:600; padding:9px 14px;}
+  .res-block table{width:100%; border-collapse:collapse; font-size:13px;}
+  .res-block td{padding:8px 14px; border-bottom:1px solid #eef1f5; vertical-align:top;}
+  .res-block td:first-child{width:36%; color:var(--sub); background:#fafbfd;}
+  .tag{display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; margin-left:6px;}
+  .tag.tbd{background:#fbeaea; color:#a33;}
+  .tag.ok{background:#e3f2e8; color:var(--ok);}
+  .budget-warn{font-size:12px; background:#fdeeee; border:1px solid #eec3c3; color:#8c2f2f; border-radius:6px; padding:11px 13px; margin:14px 0;}
+  .rec{background:#f2f7f3; border:1px solid #cfe3d5; border-radius:8px; padding:13px 15px; font-size:13px; margin-bottom:10px;}
+  .rec b{color:var(--ok);}
+  .rec.w{background:#fdf4ec; border-color:#eed3b8;} .rec.w b{color:var(--warn);}
+  @media print{
+    header, .steps, .btns, .langbar, .noprint{display:none!important;}
+    body{background:#fff;} .card{border:none; box-shadow:none; padding:0;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>KRST 열처리 설비 견적 사양 구성기 <span style="font-size:12px; font-weight:400; opacity:.8">PROTOTYPE v0.2</span></h1>
+  <p>선택만 하면 사양검토서가 완성됩니다 · 모르는 항목은 "미정(TBD)"을 선택하셔도 됩니다 — 당사가 함께 확정해 드립니다</p>
+</header>
+<div class="wrap">
+  <div class="steps" id="stepbar"></div>
+
+  <!-- STEP 0 고객정보 -->
+  <div class="card page" id="p0">
+    <h2>1. 고객 기본 정보</h2>
+    <p class="desc">견적서 발행 및 회신을 위한 기본 정보입니다.</p>
+    <div class="row">
+      <fieldset><label class="q">회사명 <span class="req">필수</span></label><input type="text" id="f_company" placeholder="예: OO화학공업(주)"></fieldset>
+      <fieldset><label class="q">담당자</label><input type="text" id="f_person" placeholder="예: 홍길동 대리"></fieldset>
+      <fieldset><label class="q">연락처</label><input type="text" id="f_phone" placeholder="010-0000-0000"></fieldset>
+      <fieldset><label class="q">이메일 <span class="req">필수</span></label><input type="text" id="f_email" placeholder="name@company.com"></fieldset>
+    </div>
+    <div class="btns"><span></span><button class="next" onclick="go(1)">다음 →</button></div>
+  </div>
+
+  <!-- STEP 1 공정 목적 -->
+  <div class="card page hidden" id="p1">
+    <h2>2. 공정 목적 및 대상 물질</h2>
+    <p class="desc">어떤 물질을 어떤 목적으로 열처리하시나요?</p>
+    <fieldset>
+      <label class="q">공정 목적 <span class="req">필수</span></label>
+      <div class="opts" data-name="purpose">
+        <label><input type="radio" name="purpose" value="탄화 (Carbonization)">탄화 (Carbonization)</label>
+        <label><input type="radio" name="purpose" value="활성화 (Activation)">활성화 (Activation)</label>
+        <label><input type="radio" name="purpose" value="소성 (Sintering)">소성 (Sintering)</label>
+        <label><input type="radio" name="purpose" value="가소 (Calcination)">가소 (Calcination)</label>
+        <label><input type="radio" name="purpose" value="열처리 일반">열처리 일반</label>
+        <label><input type="radio" name="purpose" value="기타">기타</label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <label class="q">처리 대상 물질 <span class="req">필수</span><span class="hint">예: 야자각, 약용 숯, 이차전지 소재, 콜타르 슬러지 등 (해외 송부용은 영문 병기 권장)</span></label>
+      <input type="text" id="f_material">
+    </fieldset>
+    <div class="row">
+      <fieldset>
+        <label class="q">재료 형상</label>
+        <div class="opts" data-name="form">
+          <label><input type="radio" name="form" value="분말 (Powder)">분말</label>
+          <label><input type="radio" name="form" value="펠릿/성형품">펠릿/성형품</label>
+          <label><input type="radio" name="form" value="괴상/칩">괴상/칩</label>
+          <label><input type="radio" name="form" value="미정(TBD)">미정</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <label class="q">겉보기 비중 (g/cm³)<span class="hint">모르시면 비워두세요 (시료 제공 시 분석 가능)</span></label>
+        <input type="number" step="0.01" id="f_density" placeholder="예: 0.6">
+      </fieldset>
+    </div>
+    <fieldset>
+      <label class="q">가연성 · 폭발 위험성 <span class="req">필수</span></label>
+      <div class="opts" data-name="hazard">
+        <label><input type="radio" name="hazard" value="없음">없음</label>
+        <label><input type="radio" name="hazard" value="있음">있음</label>
+        <label><input type="radio" name="hazard" value="확인 필요(TBD)">확인 필요</label>
+      </div>
+    </fieldset>
+    <div class="btns"><button class="prev" onclick="go(0)">← 이전</button><button class="next" onclick="go(2)">다음 →</button></div>
+  </div>
+
+  <!-- STEP 2 공정 조건 -->
+  <div class="card page hidden" id="p2">
+    <h2>3. 공정 조건 (온도 · 분위기)</h2>
+    <p class="desc">설비 형식과 재질 결정에 가장 중요한 항목입니다.</p>
+    <div class="row">
+      <fieldset>
+        <label class="q">최고 공정 온도 (°C) <span class="req">필수</span></label>
+        <input type="number" id="f_maxtemp" placeholder="예: 900">
+      </fieldset>
+      <fieldset>
+        <label class="q">최고온도 유지 시간 (hr) <span class="req">필수</span><span class="hint">노 길이 산정에 필수입니다</span></label>
+        <input type="number" step="0.5" id="f_soak" placeholder="예: 4">
+      </fieldset>
+    </div>
+    <fieldset>
+      <label class="q">분위기 조건 <span class="req">필수</span><span class="hint">복수 선택 가능</span></label>
+      <div class="opts" data-name="atmo" data-multi="1">
+        <label><input type="checkbox" name="atmo" value="대기 (Air)">대기 (Air)</label>
+        <label><input type="checkbox" name="atmo" value="불활성 N₂/Ar (Inert)">불활성 (N₂/Ar)</label>
+        <label><input type="checkbox" name="atmo" value="수증기 (Steam)">수증기 (Steam)</label>
+        <label><input type="checkbox" name="atmo" value="환원 (Reducing)">환원</label>
+        <label><input type="checkbox" name="atmo" value="미정(TBD)">미정</label>
+      </div>
+      <div class="note hidden" id="n_steam">수증기 분위기 선택 시: 수증기 투입 온도 구간과 대략적인 투입량(kg/hr) 정보가 있으면 아래 기타 요청란에 기재해 주세요. 기밀 씰 구조(분위기 사양) 적용이 권장됩니다.</div>
+    </fieldset>
+    <fieldset>
+      <label class="q">제품 배출 온도 <span class="req">필수</span></label>
+      <div class="opts" data-name="outtemp">
+        <label><input type="radio" name="outtemp" value="상온까지 냉각 후 배출">상온까지 냉각</label>
+        <label><input type="radio" name="outtemp" value="150°C 미만">150°C 미만</label>
+        <label><input type="radio" name="outtemp" value="고온 배출 무방">고온 배출 무방</label>
+        <label><input type="radio" name="outtemp" value="미정(TBD)">미정</label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <label class="q">공정 중 유해가스 · 타르 · VOC 발생 여부</label>
+      <div class="opts" data-name="voc">
+        <label><input type="radio" name="voc" value="발생함">발생함</label>
+        <label><input type="radio" name="voc" value="발생 안 함">발생 안 함</label>
+        <label><input type="radio" name="voc" value="확인 필요(TBD)">확인 필요</label>
+      </div>
+    </fieldset>
+    <div class="btns"><button class="prev" onclick="go(1)">← 이전</button><button class="next" onclick="go(3)">다음 →</button></div>
+  </div>
+
+  <!-- STEP 3 처리량/운전 -->
+  <div class="card page hidden" id="p3">
+    <h2>4. 처리량 및 운전 방식</h2>
+    <p class="desc">배치식/연속식 형식 판단의 근거가 됩니다.</p>
+    <fieldset>
+      <label class="q">희망 설비 형태</label>
+      <div class="opts" data-name="etype">
+        <label><input type="radio" name="etype" value="배치식 (Batch)">배치식 (Batch)</label>
+        <label><input type="radio" name="etype" value="연속식 (Continuous)">연속식 (Continuous)</label>
+        <label><input type="radio" name="etype" value="추천 요청(TBD)">잘 모름 — 추천 요청</label>
+      </div>
+    </fieldset>
+    <div class="row">
+      <fieldset>
+        <label class="q">목표 처리량 <span class="req">필수</span><span class="hint">단위 포함 기재 (예: 500 kg/batch, 180 kg/hr, 2 ton/day)</span></label>
+        <input type="text" id="f_throughput" placeholder="예: 180 kg/hr">
+      </fieldset>
+      <fieldset>
+        <label class="q">일일 가동시간 / 연간 가동일수</label>
+        <input type="text" id="f_ophours" placeholder="예: 24h × 300일">
+      </fieldset>
+    </div>
+    <fieldset>
+      <label class="q">소재 투입 · 배출 방식</label>
+      <div class="opts" data-name="handling">
+        <label><input type="radio" name="handling" value="수동 (벨트컨베이어 등)">수동 (컨베이어 투입)</label>
+        <label><input type="radio" name="handling" value="자동 반송">자동 반송</label>
+        <label><input type="radio" name="handling" value="미정(TBD)">미정</label>
+      </div>
+    </fieldset>
+    <div class="btns"><button class="prev" onclick="go(2)">← 이전</button><button class="next" onclick="go(4)">다음 →</button></div>
+  </div>
+
+  <!-- STEP 4 열원/옵션 -->
+  <div class="card page hidden" id="p4">
+    <h2>5. 열원 및 부대설비 옵션</h2>
+    <p class="desc">필요한 부대설비를 선택하시면 견적 구성에 포함됩니다.</p>
+    <fieldset>
+      <label class="q">열원 <span class="req">필수</span></label>
+      <div class="opts" data-name="heat">
+        <label><input type="radio" name="heat" value="전기 외열식">전기 (Electric)</label>
+        <label><input type="radio" name="heat" value="가스 외열식">가스 (Gas)</label>
+        <label><input type="radio" name="heat" value="전기/가스 비교 견적 요청">전기·가스 비교 견적</label>
+      </div>
+      <div class="note info hidden" id="n_gas">가스식 선택 시: 전기식 대비 유틸리티 사용량 비교 자료가 함께 제공될 수 있습니다 (투자 검토용).</div>
+    </fieldset>
+    <fieldset>
+      <label class="q">부대설비 (복수 선택)</label>
+      <div class="opts" data-name="options" data-multi="1">
+        <label><input type="checkbox" name="options" value="로터리 쿨러 (연속 냉각)">로터리 쿨러</label>
+        <label><input type="checkbox" name="options" value="재연소로 (Thermal Oxidizer/RTO)">재연소로 (배가스 처리)</label>
+        <label><input type="checkbox" name="options" value="폐열회수 보일러 (과열증기 제조)">폐열회수 보일러</label>
+        <label><input type="checkbox" name="options" value="백필터/스크러버">백필터/스크러버</label>
+        <label><input type="checkbox" name="options" value="원격 모니터링/데이터 로깅">원격 모니터링</label>
+      </div>
+      <div class="note hidden" id="n_env">재연소로 · 폐열회수 보일러 · 백필터는 배가스 성분/유량 등 상세 공정정보 확인 후 별도 기술협의로 사양이 확정됩니다.</div>
+    </fieldset>
+    <fieldset>
+      <label class="q">투자 예산 범위 / 납기 목표 (선택)</label>
+      <input type="text" id="f_budget" placeholder="예: 30~50억 / 발주 후 12개월 이내">
+    </fieldset>
+    <fieldset>
+      <label class="q">기타 요청사항</label>
+      <textarea id="f_etc" rows="3" placeholder="수증기 투입량, 설치 공간 제약, 인증 요구사항 등"></textarea>
+    </fieldset>
+    <div class="btns"><button class="prev" onclick="go(3)">← 이전</button><button class="next" onclick="buildResult()">사양검토서 생성 →</button></div>
+  </div>
+
+  <!-- STEP 5 결과 -->
+  <div class="card page hidden" id="p5">
+    <div class="langbar noprint">
+      <button id="lb_ko" class="on" onclick="renderResult('ko')">한국어</button>
+      <button id="lb_en" onclick="renderResult('en')">English</button>
+      <button id="lb_ja" onclick="renderResult('ja')">日本語</button>
+      <span style="font-size:11.5px; color:var(--sub); align-self:center; margin-left:6px;" id="lb_hint"></span>
+    </div>
+    <h2 id="r_title"></h2>
+    <p class="desc" id="r_date"></p>
+    <div id="r_recs"></div>
+    <div id="r_body"></div>
+    <div class="budget-warn" id="r_warn"></div>
+    <div class="btns noprint">
+      <button class="prev" onclick="go(4)" id="b_edit"></button>
+      <div style="display:flex; gap:8px;">
+        <button class="prev" onclick="printPDF()" id="b_print"></button>
+        <button class="next" onclick="copySpec()" id="b_copy"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGES=6, NAMES=["고객정보","공정 목적","공정 조건","처리량·운전","열원·옵션","사양검토서"];
+let cur=0;
+const bar=document.getElementById('stepbar');
+NAMES.forEach((n,i)=>{
+  const d=document.createElement('div');d.className='st';d.textContent=(i+1)+'. '+n;d.id='st'+i;
+  d.title=(i===5?'클릭 시 현재 입력값으로 사양검토서를 생성합니다':n+' 단계로 이동');
+  d.addEventListener('click',()=>{ if(i===5) buildResult(); else go(i); });
+  bar.appendChild(d);
+});
+function go(n){
+  document.getElementById('p'+cur).classList.add('hidden');
+  document.getElementById('p'+n).classList.remove('hidden');
+  for(let i=0;i<PAGES;i++){const s=document.getElementById('st'+i);s.className='st'+(i<n?' done':i===n?' active':'');}
+  cur=n; window.scrollTo({top:0});
+}
+go(0);
+document.querySelectorAll('.opts').forEach(g=>{
+  g.querySelectorAll('label').forEach(l=>{
+    l.addEventListener('click',()=>{
+      setTimeout(()=>{
+        g.querySelectorAll('label').forEach(x=>{
+          const i=x.querySelector('input'); x.classList.toggle('sel', i.checked);
+        });
+        reactHints();
+      },0);
+    });
+  });
+});
+function vals(name){return [...document.querySelectorAll(`input[name=${name}]:checked`)].map(i=>i.value);}
+function val1(name){const v=vals(name);return v.length?v[0]:null;}
+function reactHints(){
+  document.getElementById('n_steam').classList.toggle('hidden', !vals('atmo').some(v=>v.includes('수증기')));
+  const h=val1('heat'); document.getElementById('n_gas').classList.toggle('hidden', !(h&&h.includes('가스')));
+  document.getElementById('n_env').classList.toggle('hidden', !vals('options').some(v=>/재연소로|폐열회수|백필터/.test(v)));
+}
+function fmt(v){return v&&String(v).trim()? String(v).trim() : null;}
+
+/* ===================== i18n ===================== */
+const L={
+ ko:{title:'열처리 장비 사양 검토서 (자동 생성)', gen:'생성일', auto:'본 문서는 고객 입력값 기반 자동 생성본입니다.',
+   s1:'1. 고객 정보', s2:'2. 공정 목적 · 대상 물질', s3:'3. 공정 조건', s4:'4. 처리량 · 운전', s5:'5. 열원 · 부대설비', s6:'6. 참고 예산 (비확정)',
+   f:{company:'회사명',person:'담당자',phone:'연락처',email:'이메일',purpose:'공정 목적',material:'처리 대상 물질',form:'재료 형상',density:'겉보기 비중',hazard:'가연성·폭발 위험',
+      maxtemp:'최고 공정 온도',soak:'최고온도 유지 시간',atmo:'분위기 조건',outtemp:'제품 배출 온도',voc:'유해가스·VOC 발생',
+      etype:'설비 형태',throughput:'목표 처리량',ophours:'가동 시간',handling:'투입·배출 방식',heat:'열원',options:'부대설비',budget:'예산·납기',etc:'기타 요청',refcase:'참고 사례'},
+   tbd:'TBD — 협의 필요', ok:'확정', none:'선택 없음', autoAdd:'시스템 자동 추가', recSuffix:'입력값 기반 추천',
+   warn:'<b>※ 참고 예산에 대한 안내</b><br>본 화면의 예산 범위는 과거 유사 프로젝트의 예산 견적(Budgetary Quotation) 사례를 참고한 <b>비확정 참고치</b>입니다. 정식 견적은 제작사 기술 검토 후 제공되며, 발주 시기·프로젝트 로드·히터 납기에 따라 변동될 수 있습니다. 기본 납기는 약 12개월(일본 제작 기준)입니다.',
+   edit:'← 수정', print:'인쇄 / PDF 저장', copy:'사양서 텍스트 복사', hint:'선택한 언어로 인쇄/PDF 저장됩니다',
+   copied:'사양서 텍스트가 복사되었습니다.\n메일 본문에 붙여넣어 발송하실 수 있습니다.',
+   etypeRecNote:' 형식으로 1차 검토를 제안합니다. 소요 체류시간과 충진율에 따라 최종 확정됩니다.',
+   recs:{
+    sealed:{h:'분위기 사양 (Sealed Type) 권장',b:'수증기/불활성 분위기 공정은 기밀 씰 구조 적용이 권장됩니다. 입·출구 슬라이딩 씰부에서 가스·고체 누설을 특수 씰 구조로 억제하며, 정상 운전 시 약간의 양압을 유지합니다.'},
+    openWarn:{h:'대기 사양(Open Type) 적용 시 주의',b:'수증기 투입량이 많으면 노 내부 압력 제어를 위한 대량 배기 과정에서 처리물이 배기와 함께 유출될 우려가 있습니다.'},
+    heater:{h:'고온 히터 납기 유의',b:'최고 온도 {T}°C — 900°C급 히터 납기에 따라 전체 납기가 변동될 수 있습니다. 레토르트 재질은 SUS310S급 내열강이 일반적으로 적용됩니다.'},
+    cooler:{h:'로터리 쿨러 구성 권장',b:'배출 온도 요구조건 충족을 위해 연속식 로터리 냉각장치 구성이 권장됩니다. (참고 사례: φ1000×유효 6700, 150 kg/hr 이상, 냉각 약 60분)'},
+    voc:{h:'배가스 처리설비 검토 필요',b:'타르/VOC 발생 공정은 배기가스 라인 및 환경설비(재연소로, 스크러버 등) 검토가 필요합니다. 상세 공정정보 확인 후 기술협의로 확정됩니다.'},
+    etype:{h:'설비 형식 추천',b:''}},
+   budget:{big:'약 93억 규모 사례 참고 (φ2400 연속 전용, 500~700 kg/hr) — 대형 설비로 현지 용접조립 필요',
+     std:'약 38억 규모 사례 참고 (φ1200, 배치 500 kg/batch 또는 연속 180 kg/hr)',
+     cooler:' + 로터리 쿨러 약 15억 사례 참고',
+     gas:'가스식/비교 견적은 참고 사례 데이터가 없어 제작사 검토 후 제공됩니다.'}},
+ en:{title:'Heat Treatment Equipment — Specification Review Sheet (Auto-generated)', gen:'Date', auto:'This document was auto-generated from customer inputs.',
+   s1:'1. Customer Information', s2:'2. Application & Target Material', s3:'3. Process Conditions', s4:'4. Throughput & Operation', s5:'5. Heat Source & Auxiliary Equipment', s6:'6. Budget Reference (Non-binding)',
+   f:{company:'Company Name',person:'Contact Person',phone:'Contact Number',email:'E-mail',purpose:'Process Purpose',material:'Target Material',form:'Material Form',density:'Bulk Density',hazard:'Flammability / Explosion Risk',
+      maxtemp:'Max. Operating Temperature',soak:'Soaking Time at Peak',atmo:'Atmosphere',outtemp:'Product Discharge Temperature',voc:'Hazardous Gas / VOC Generation',
+      etype:'Equipment Type',throughput:'Required Throughput',ophours:'Operating Hours',handling:'Material In/Out Handling',heat:'Heat Source',options:'Auxiliary Equipment',budget:'Budget / Timeline',etc:'Additional Remarks',refcase:'Reference Case'},
+   tbd:'TBD — to be discussed', ok:'Confirmed', none:'None selected', autoAdd:'auto-added by system', recSuffix:'recommended from inputs',
+   warn:'<b>* Note on budget reference</b><br>The budget range shown is a <b>non-binding reference</b> based on budgetary quotation cases of similar past projects. A formal quotation will be provided after the manufacturer\'s technical review, and may vary depending on order timing, project load, and heater lead time. Standard delivery is approx. 12 months (manufactured in Japan).',
+   edit:'← Edit', print:'Print / Save as PDF', copy:'Copy spec text', hint:'Prints / saves PDF in the selected language',
+   copied:'Specification text copied.\nYou can paste it into an e-mail.',
+   etypeRecNote:' type is proposed for initial review. Final selection depends on residence time and filling rate.',
+   recs:{
+    sealed:{h:'Sealed Type (atmosphere spec) recommended',b:'For steam/inert atmosphere processes, an airtight seal structure is recommended. Special seals at the inlet/outlet sliding sections suppress gas and solid leakage; slight positive pressure is maintained during normal operation.'},
+    openWarn:{h:'Caution when applying Open Type',b:'With large steam injection, heavy exhaust required for furnace pressure control may carry processed material out with the exhaust.'},
+    heater:{h:'High-temperature heater lead time',b:'Max. temperature {T}°C — overall delivery may vary depending on lead time of 900°C-class heaters. Retort material is typically SUS310S heat-resistant steel.'},
+    cooler:{h:'Rotary cooler recommended',b:'A continuous rotary cooler is recommended to meet the discharge temperature requirement. (Reference: φ1000 × effective 6700, ≥150 kg/hr, approx. 60 min cooling)'},
+    voc:{h:'Exhaust gas treatment review required',b:'Processes generating tar/VOC require review of the exhaust line and environmental equipment (thermal oxidizer, scrubber, etc.), to be finalized through technical discussion after detailed process data is confirmed.'},
+    etype:{h:'Equipment type recommendation',b:''}},
+   budget:{big:'Reference case: approx. KRW 9.3B (φ2400, continuous-only, 500–700 kg/hr) — large equipment requiring on-site welding assembly',
+     std:'Reference case: approx. KRW 3.8B (φ1200, batch 500 kg/batch or continuous 180 kg/hr)',
+     cooler:' + rotary cooler approx. KRW 1.5B reference',
+     gas:'No reference data is available for gas-fired / comparison quotations; to be provided after manufacturer review.'}},
+ ja:{title:'熱処理装置 仕様検討書（自動生成）', gen:'作成日', auto:'本書は顧客入力値に基づく自動生成資料です。',
+   s1:'1. 顧客情報', s2:'2. 用途・処理対象物', s3:'3. プロセス条件', s4:'4. 処理量・運転', s5:'5. 熱源・付帯設備', s6:'6. 参考予算（非確定）',
+   f:{company:'会社名',person:'担当者',phone:'連絡先',email:'E-mail',purpose:'プロセス目的',material:'処理対象物質',form:'材料形状',density:'かさ比重',hazard:'可燃性・爆発危険性',
+      maxtemp:'最高プロセス温度',soak:'最高温度保持時間',atmo:'雰囲気条件',outtemp:'製品排出温度',voc:'有害ガス・VOC発生',
+      etype:'装置形式',throughput:'目標処理量',ophours:'稼働時間',handling:'投入・排出方式',heat:'熱源',options:'付帯設備',budget:'予算・納期',etc:'その他要望',refcase:'参考事例'},
+   tbd:'TBD — 要協議', ok:'確定', none:'選択なし', autoAdd:'システム自動追加', recSuffix:'入力値に基づく推奨',
+   warn:'<b>※ 参考予算について</b><br>本画面の予算範囲は、過去の類似プロジェクトの予算見積（Budgetary Quotation）事例を参考にした<b>非確定の参考値</b>です。正式見積はメーカー技術検討後に提供され、発注時期・プロジェクト負荷・ヒーター納期により変動する可能性があります。標準納期は約12ヶ月（日本製作基準）です。',
+   edit:'← 修正', print:'印刷 / PDF保存', copy:'仕様テキストをコピー', hint:'選択した言語で印刷・PDF保存されます',
+   copied:'仕様書テキストをコピーしました。\nメール本文に貼り付けて送信できます。',
+   etypeRecNote:' 形式での一次検討を提案します。滞留時間と充填率により最終確定します。',
+   recs:{
+    sealed:{h:'雰囲気仕様（Sealed Type）推奨',b:'水蒸気・不活性雰囲気プロセスには気密シール構造の適用を推奨します。入口・出口のスライディングシール部（レトルト－フード接続部）でガス・固体の漏れを特殊シール構造で抑制し、正常運転時はわずかな正圧を維持します。'},
+    openWarn:{h:'大気仕様（Open Type）適用時の注意',b:'水蒸気投入量が多い場合、炉内圧力制御のための大量排気の過程で、処理物が排気とともに流出するおそれがあります。'},
+    heater:{h:'高温ヒーター納期に注意',b:'最高温度 {T}°C — 900°C級ヒーターの納期により全体納期が変動する可能性があります。レトルト材質は一般的にSUS310S級耐熱鋼を適用します。'},
+    cooler:{h:'ロータリークーラー構成推奨',b:'排出温度要求を満たすため、連続式ロータリー冷却装置の構成を推奨します。（参考事例：φ1000×有効6700、150 kg/hr以上、冷却約60分）'},
+    voc:{h:'排ガス処理設備の検討が必要',b:'タール・VOCが発生するプロセスは、排ガスライン及び環境設備（再燃焼炉、スクラバー等）の検討が必要です。詳細プロセス情報の確認後、技術協議にて確定します。'},
+    etype:{h:'装置形式の推奨',b:''}},
+   budget:{big:'参考事例：約93億ウォン規模（φ2400 連続専用、500~700 kg/hr）— 大型設備のため現地溶接組立が必要',
+     std:'参考事例：約38億ウォン規模（φ1200、バッチ500 kg/batch 又は連続180 kg/hr）',
+     cooler:' + ロータリークーラー 約15億ウォン参考',
+     gas:'ガス式・比較見積は参考事例データがないため、メーカー検討後に提供されます。'}}
+};
+/* 선택지 값 번역 (자유 입력값은 원문 유지) */
+const VT={
+ '탄화 (Carbonization)':{en:'Carbonization',ja:'炭化（Carbonization）'},
+ '활성화 (Activation)':{en:'Activation',ja:'賦活（Activation）'},
+ '소성 (Sintering)':{en:'Sintering',ja:'焼成（Sintering）'},
+ '가소 (Calcination)':{en:'Calcination',ja:'仮焼（Calcination）'},
+ '열처리 일반':{en:'General heat treatment',ja:'熱処理一般'},
+ '기타':{en:'Other',ja:'その他'},
+ '분말 (Powder)':{en:'Powder',ja:'粉末'},
+ '펠릿/성형품':{en:'Pellet / Formed',ja:'ペレット・成形品'},
+ '괴상/칩':{en:'Lump / Chip',ja:'塊状・チップ'},
+ '미정(TBD)':{en:'TBD',ja:'未定（TBD）'},
+ '없음':{en:'None',ja:'なし'},
+ '있음':{en:'Yes',ja:'あり'},
+ '확인 필요(TBD)':{en:'To be confirmed (TBD)',ja:'要確認（TBD）'},
+ '대기 (Air)':{en:'Air',ja:'大気（Air）'},
+ '불활성 N₂/Ar (Inert)':{en:'Inert (N₂/Ar)',ja:'不活性（N₂/Ar）'},
+ '수증기 (Steam)':{en:'Steam',ja:'水蒸気（Steam）'},
+ '환원 (Reducing)':{en:'Reducing',ja:'還元（Reducing）'},
+ '상온까지 냉각 후 배출':{en:'Cool to room temperature before discharge',ja:'常温まで冷却後に排出'},
+ '150°C 미만':{en:'Below 150°C',ja:'150°C未満'},
+ '고온 배출 무방':{en:'High-temperature discharge acceptable',ja:'高温排出可'},
+ '발생함':{en:'Generated',ja:'発生あり'},
+ '발생 안 함':{en:'Not generated',ja:'発生なし'},
+ '배치식 (Batch)':{en:'Batch',ja:'バッチ式（Batch）'},
+ '연속식 (Continuous)':{en:'Continuous',ja:'連続式（Continuous）'},
+ '추천 요청(TBD)':{en:'Recommendation requested (TBD)',ja:'推奨依頼（TBD）'},
+ '수동 (벨트컨베이어 등)':{en:'Manual (belt conveyor, etc.)',ja:'手動（ベルトコンベア等）'},
+ '자동 반송':{en:'Automatic transfer',ja:'自動搬送'},
+ '전기 외열식':{en:'Externally electric-heated',ja:'電気外熱式'},
+ '가스 외열식':{en:'Externally gas-fired',ja:'ガス外熱式'},
+ '전기/가스 비교 견적 요청':{en:'Electric vs. gas comparison quotation requested',ja:'電気・ガス比較見積依頼'},
+ '로터리 쿨러 (연속 냉각)':{en:'Rotary cooler (continuous cooling)',ja:'ロータリークーラー（連続冷却）'},
+ '재연소로 (Thermal Oxidizer/RTO)':{en:'Thermal oxidizer (RTO)',ja:'再燃焼炉（Thermal Oxidizer/RTO）'},
+ '폐열회수 보일러 (과열증기 제조)':{en:'Waste heat recovery boiler (superheated steam)',ja:'廃熱回収ボイラー（過熱蒸気製造）'},
+ '백필터/스크러버':{en:'Bag filter / Scrubber',ja:'バグフィルター・スクラバー'},
+ '원격 모니터링/데이터 로깅':{en:'Remote monitoring / data logging',ja:'遠隔監視・データロギング'}
+};
+function tv(v,lang){
+  if(v===null||v===undefined) return null;
+  if(lang==='ko') return v;
+  return (VT[v]&&VT[v][lang])||v;
+}
+
+/* ===================== 결과 생성 ===================== */
+let D=null, R={recs:[],budget:null,etypeRec:null,etypeIsRec:false,autoCooler:false}, curLang='ko', specText='';
+
+function buildResult(){
+  D={
+    company:fmt(document.getElementById('f_company').value),
+    person:fmt(document.getElementById('f_person').value),
+    phone:fmt(document.getElementById('f_phone').value),
+    email:fmt(document.getElementById('f_email').value),
+    purpose:val1('purpose'), material:fmt(document.getElementById('f_material').value),
+    form:val1('form'), density:fmt(document.getElementById('f_density').value),
+    hazard:val1('hazard'),
+    maxtemp:fmt(document.getElementById('f_maxtemp').value), soak:fmt(document.getElementById('f_soak').value),
+    atmo:vals('atmo'), outtemp:val1('outtemp'), voc:val1('voc'),
+    etype:val1('etype'), throughput:fmt(document.getElementById('f_throughput').value),
+    ophours:fmt(document.getElementById('f_ophours').value), handling:val1('handling'),
+    heat:val1('heat'), options:vals('options'),
+    budget:fmt(document.getElementById('f_budget').value), etc:fmt(document.getElementById('f_etc').value)
+  };
+  R={recs:[],budget:null,etypeRec:null,etypeIsRec:false,autoCooler:false};
+  const steam=D.atmo.some(v=>v.includes('수증기'));
+  const inert=D.atmo.some(v=>v.includes('불활성')||v.includes('환원'));
+  if(steam||inert){
+    R.recs.push({k:'sealed',t:'ok'});
+    if(steam) R.recs.push({k:'openWarn',t:'w'});
+  }
+  const mt=parseFloat(D.maxtemp);
+  if(mt>=900) R.recs.push({k:'heater',t:'w',T:mt});
+  if(D.outtemp&&(D.outtemp.includes('상온')||D.outtemp.includes('150'))){
+    R.recs.push({k:'cooler',t:'ok'});
+    if(!D.options.some(o=>o.includes('쿨러'))){D.options.push('로터리 쿨러 (연속 냉각)');R.autoCooler=true;}
+  }
+  if(D.voc==='발생함'&&!D.options.some(o=>/재연소로/.test(o))) R.recs.push({k:'voc',t:'w'});
+  if(!D.etype||D.etype.includes('TBD')){
+    const th=(D.throughput||'').toLowerCase();
+    if(/batch|배치/.test(th)) R.etypeRec='배치식 (Batch)';
+    else if(/hr|day|ton|톤/.test(th)) R.etypeRec='연속식 (Continuous)';
+    if(R.etypeRec){R.etypeIsRec=true;R.recs.push({k:'etype',t:'ok'});}
+  }
+  if(D.heat&&D.heat.includes('전기')){
+    const th=(D.throughput||'');
+    const num=parseFloat(th.replace(/[^0-9.]/g,''));
+    if(/hr/.test(th)&&num>=400) R.budget={key:'big',cooler:false};
+    else if(th) R.budget={key:'std',cooler:false};
+    if(R.budget&&D.options.some(o=>o.includes('쿨러'))) R.budget.cooler=true;
+  } else if(D.heat){
+    R.budget={key:'gas',cooler:false};
+  }
+  renderResult('ko');
+  go(5);
+}
+
+function cell(k,v,lang){
+  const t=L[lang];
+  const tbd = v===null||v===undefined;
+  return `<tr><td>${k}</td><td>${tbd?`<span class="tag tbd">${t.tbd}</span>`:v+` <span class="tag ok">${t.ok}</span>`}</td></tr>`;
+}
+function block(title,rows,lang){
+  return `<div class="res-block"><div class="hd">${title}</div><table>${rows.map(r=>cell(r[0],r[1],lang)).join('')}</table></div>`;
+}
+
+function renderResult(lang){
+  curLang=lang;
+  const t=L[lang];
+  ['ko','en','ja'].forEach(l=>document.getElementById('lb_'+l).classList.toggle('on',l===lang));
+  document.getElementById('lb_hint').textContent=t.hint;
+  document.getElementById('r_title').textContent=t.title;
+  const dateStr=new Date().toLocaleDateString(lang==='ko'?'ko-KR':lang==='ja'?'ja-JP':'en-US');
+  document.getElementById('r_date').textContent=t.gen+': '+dateStr+' · '+t.auto;
+  document.getElementById('r_recs').innerHTML=R.recs.map(r=>{
+    const m=t.recs[r.k];
+    let b=m.b.replace('{T}',r.T||'');
+    if(r.k==='etype') b=tv(R.etypeRec,lang)+t.etypeRecNote;
+    return `<div class="rec ${r.t==='w'?'w':''}"><b>${m.h}</b> — ${b}</div>`;
+  }).join('');
+  const f=t.f;
+  let etypeVal=D.etype;
+  if(R.etypeIsRec&&R.etypeRec) etypeVal=tv(R.etypeRec,lang)+' — '+t.recSuffix;
+  else etypeVal=tv(D.etype,lang);
+  const optList=D.options.length? D.options.map(o=>{
+    let s=tv(o,lang);
+    if(R.autoCooler&&o.includes('쿨러')) s+=' — '+t.autoAdd;
+    return s;
+  }).join('<br>') : t.none;
+  const B=[];
+  B.push(block(t.s1,[[f.company,D.company],[f.person,D.person],[f.phone,D.phone],[f.email,D.email]],lang));
+  B.push(block(t.s2,[[f.purpose,tv(D.purpose,lang)],[f.material,D.material],[f.form,tv(D.form,lang)],[f.density,D.density?D.density+' g/cm³':null],[f.hazard,tv(D.hazard,lang)]],lang));
+  B.push(block(t.s3,[[f.maxtemp,D.maxtemp?D.maxtemp+' °C':null],[f.soak,D.soak?D.soak+' hr':null],[f.atmo,D.atmo.length?D.atmo.map(a=>tv(a,lang)).join(', '):null],[f.outtemp,tv(D.outtemp,lang)],[f.voc,tv(D.voc,lang)]],lang));
+  B.push(block(t.s4,[[f.etype,etypeVal],[f.throughput,D.throughput],[f.ophours,D.ophours],[f.handling,tv(D.handling,lang)]],lang));
+  B.push(block(t.s5,[[f.heat,tv(D.heat,lang)],[f.options,optList],[f.budget,D.budget],[f.etc,D.etc]],lang));
+  if(R.budget){
+    let ref=t.budget[R.budget.key];
+    if(R.budget.cooler) ref+=t.budget.cooler;
+    B.push(block(t.s6,[[f.refcase,ref]],lang));
+  }
+  document.getElementById('r_body').innerHTML=B.join('');
+  document.getElementById('r_warn').innerHTML=t.warn;
+  document.getElementById('b_edit').textContent=t.edit;
+  document.getElementById('b_print').textContent=t.print;
+  document.getElementById('b_copy').textContent=t.copy;
+  specText='['+t.title+']\n'+t.gen+': '+dateStr+'\n\n';
+  document.querySelectorAll('#r_body .res-block').forEach(b=>{
+    specText+='■ '+b.querySelector('.hd').textContent+'\n';
+    b.querySelectorAll('tr').forEach(tr=>{
+      const c=tr.querySelectorAll('td');
+      specText+='  - '+c[0].textContent+': '+c[1].textContent.replace(' '+t.ok,'')+'\n';
+    });
+    specText+='\n';
+  });
+  specText+=document.getElementById('r_warn').textContent+'\n';
+}
+
+function printPDF(){
+  const names={ko:'KRST_사양검토서',en:'KRST_Spec_Review_Sheet',ja:'KRST_仕様検討書'};
+  const old=document.title;
+  document.title=names[curLang]+'_'+new Date().toISOString().slice(0,10);
+  window.print();
+  document.title=old;
+}
+function copySpec(){
+  navigator.clipboard.writeText(specText).then(()=>alert(L[curLang].copied));
+}
+</script>
+</body>
+</html>
