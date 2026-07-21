@@ -834,7 +834,7 @@ function buildFormHtml(){
     tdV:'font-size:9.7px; color:#1c2530; border:1px solid #cdd4de; padding:5px 8px; vertical-align:top; word-break:break-word;'
   };
   const row=(l,v)=>`<tr style="page-break-inside:avoid;"><td style="${S.tdL}">${l}</td><td style="${S.tdV}">${v}</td></tr>`;
-  const sec=(title,rowsHtml,subs)=>`<div style="margin-bottom:3px;"><div style="${S.sec} page-break-after:avoid;">${title}</div>${subs?subs:''}<table style="${S.tbl}">${rowsHtml}</table></div>`;
+  const sec=(title,rowsHtml,subs)=>`<div class="pdf-sec" style="margin-bottom:3px; page-break-inside:avoid; break-inside:avoid;"><div style="${S.sec}">${title}</div>${subs?subs:''}<table style="${S.tbl}">${rowsHtml}</table></div>`;
   let html=`<div style="${S.wrap}">`;
   html+=`<div style="text-align:center; font-size:26px; font-weight:800; letter-spacing:1px; color:#a3454a; line-height:1;">KRST<sup style="font-size:10px;">®</sup></div>`;
   html+=`<div style="text-align:center; font-size:10px; font-weight:700; color:#a3454a; margin:1px 0 6px;">Kiln 사업부</div>`;
@@ -926,7 +926,7 @@ function downloadFormPDF(cb){
   const done=(ok)=>{ if(wrap.parentNode)document.body.removeChild(wrap); window.scrollTo(0,sy); if(cb)cb(ok); };
   html2pdf().set({margin:[9,8,9,8], filename:fname, image:{type:'jpeg',quality:0.97},
     html2canvas:{scale:2, useCORS:true, backgroundColor:'#ffffff'},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}, pagebreak:{mode:['css','legacy']}})
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}, pagebreak:{mode:['css','legacy'], avoid:'.pdf-sec'}})
     .from(wrap.firstElementChild).save()
     .then(()=>done(true))
     .catch(()=>{ alert('PDF 생성 중 오류가 발생했습니다.'); done(false); });
