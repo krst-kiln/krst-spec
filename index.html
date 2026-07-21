@@ -75,6 +75,12 @@
   .rec{background:#f2f7f3; border:1px solid #cfe3d5; border-radius:8px; padding:13px 15px; font-size:13px; margin-bottom:10px;}
   .rec b{color:var(--ok);}
   .rec.w{background:#fdf4ec; border-color:#eed3b8;} .rec.w b{color:var(--warn);}
+  .terms{border:1px solid var(--line); border-radius:8px; margin:6px 0 16px; overflow:hidden;}
+  .terms .hd{background:#eef2f8; color:var(--navy); font-size:13px; font-weight:700; padding:9px 14px; border-bottom:1px solid var(--line);}
+  .terms ul{list-style:none; margin:0; padding:10px 14px;}
+  .terms li{font-size:12px; color:var(--txt); padding:5px 0; border-bottom:1px dashed #edf0f4; line-height:1.5;}
+  .terms li:last-child{border-bottom:none;}
+  .terms li b{color:var(--navy2);}
   @media print{
     header, .steps, .btns, .langbar, .noprint{display:none!important;}
     body{background:#fff;} .card{border:none; box-shadow:none; padding:0;}
@@ -437,6 +443,7 @@
     <p class="desc" id="r_date"></p>
     <div id="r_recs"></div>
     <div id="r_body"></div>
+    <div id="r_terms"></div>
     <div class="budget-warn" id="r_warn"></div>
     <div class="note info noprint" id="r_contact"></div>
     <div class="btns noprint">
@@ -492,7 +499,14 @@ function gv(id){return fmt(document.getElementById(id).value);}
 
 /* ===================== i18n ===================== */
 const L={
- ko:{title:'열처리 장비 사양 검토서 (자동 생성)', gen:'생성일', auto:'본 문서는 고객 입력값 기반 자동 생성본입니다.',
+ ko:{title:'Heat Treatment Equipment Technical Specification Inquiry Form', gen:'생성일', auto:'본 문서는 고객 입력값 기반 자동 생성본입니다.',
+   termsTitle:'핵심 용어 해설 / Key Terms',
+   terms:['소성/가소/탄화 (Sintering/Calcination/Carbonization) : 분말을 고온 가열해 굳히거나(소성), 성분을 분해·제거하거나(가소), 탄소화(탄화)하는 열처리 공정',
+     '분위기 가스 (Atmosphere) : 노 내부를 채우는 기체. 대기(Air)·불활성(N₂/Ar)·환원(H₂)·진공 등 — 제품 산화 방지나 특성 제어에 사용',
+     '소킹 (Soaking / Hold) : 목표 온도에 도달한 뒤 그 온도를 일정 시간 유지하는 단계. 길수록 노가 길어짐',
+     '온도 편차 (Uniformity) : 노 내부 위치별 온도 차이(± °C). 작을수록 품질 균일, 설비 정밀도 요구 ↑',
+     '승온·냉각 속도 (Heating/Cooling Rate) : 분당 올리거나 내리는 온도(°C/min). 제품 품질과 노 길이·냉각부 용량을 좌우',
+     '처리량 (Throughput) : 시간·일 단위 생산량(kg/day 등). 노 크기와 생산능력을 결정하는 핵심 값'],
    s1:'1. 고객 정보', s2:'2. 공정 목적 · 대상 물질', s3:'3. 공정 조건', s4:'4. 처리량 · 운전', s5:'5. 열원 · 부대설비', s6:'참고 예산 (비확정)',
    s7:'6. 설치 환경', s8:'7. 자동화 · 공정 관리', s9:'8. 안전 · 환경 · 인증', s10:'9. 유지보수 · 경제성 · 확장',
    f:{company:'회사명',person:'담당자',phone:'연락처',email:'이메일',purpose:'공정 목적',material:'처리 대상 물질',form:'재료 형상',density:'겉보기 비중',hazard:'가연성·폭발 위험',
@@ -521,7 +535,14 @@ const L={
      std:'약 38억 규모 사례 참고 (φ1200, 배치 500 kg/batch 또는 연속 180 kg/hr)',
      cooler:' + 로터리 쿨러 약 15억 사례 참고',
      gas:'가스식/비교 견적은 참고 사례 데이터가 없어 제작사 검토 후 제공됩니다.'}},
- en:{title:'Heat Treatment Equipment — Specification Review Sheet (Auto-generated)', gen:'Date', auto:'This document was auto-generated from customer inputs.',
+ en:{title:'Heat Treatment Equipment Technical Specification Inquiry Form', gen:'Date', auto:'This document was auto-generated from customer inputs.',
+   termsTitle:'Key Terms',
+   terms:['Sintering / Calcination / Carbonization : heat treatment to consolidate powder (sintering), decompose/remove components (calcination), or carbonize (carbonization).',
+     'Atmosphere : gas filling the furnace — Air, Inert (N₂/Ar), Reducing (H₂), Vacuum, etc. Used to prevent oxidation or control product properties.',
+     'Soaking / Hold : the stage of holding the target temperature for a set time after reaching it. Longer hold requires a longer furnace.',
+     'Uniformity : temperature difference by position inside the furnace (± °C). Smaller = more uniform quality, higher equipment precision required.',
+     'Heating / Cooling Rate : temperature raised or lowered per minute (°C/min). Affects product quality and furnace / cooling capacity.',
+     'Throughput : output per hour/day (kg/day, etc.). The key value determining furnace size and production capacity.'],
    s1:'1. Customer Information', s2:'2. Application & Target Material', s3:'3. Process Conditions', s4:'4. Throughput & Operation', s5:'5. Heat Source & Auxiliary Equipment', s6:'Budget Reference (Non-binding)',
    s7:'6. Installation Environment', s8:'7. Automation & Process Control', s9:'8. Safety & Environmental & Certification', s10:'9. Maintenance & Economics & Scalability',
    f:{company:'Company Name',person:'Contact Person',phone:'Contact Number',email:'E-mail',purpose:'Process Purpose',material:'Target Material',form:'Material Form',density:'Bulk Density',hazard:'Flammability / Explosion Risk',
@@ -550,7 +571,14 @@ const L={
      std:'Reference case: approx. KRW 3.8B (φ1200, batch 500 kg/batch or continuous 180 kg/hr)',
      cooler:' + rotary cooler approx. KRW 1.5B reference',
      gas:'No reference data is available for gas-fired / comparison quotations; to be provided after manufacturer review.'}},
- ja:{title:'熱処理装置 仕様検討書（自動生成）', gen:'作成日', auto:'本書は顧客入力値に基づく自動生成資料です。',
+ ja:{title:'Heat Treatment Equipment Technical Specification Inquiry Form', gen:'作成日', auto:'本書は顧客入力値に基づく自動生成資料です。',
+   termsTitle:'主要用語解説 / Key Terms',
+   terms:['焼成/仮焼/炭化 (Sintering/Calcination/Carbonization) : 粉末を高温加熱して固める(焼成)、成分を分解・除去する(仮焼)、炭素化する(炭化)熱処理工程。',
+     '雰囲気ガス (Atmosphere) : 炉内を満たす気体。大気(Air)・不活性(N₂/Ar)・還元(H₂)・真空など — 製品の酸化防止や特性制御に使用。',
+     'ソーキング (Soaking / Hold) : 目標温度到達後、その温度を一定時間保持する段階。長いほど炉が長くなる。',
+     '温度偏差 (Uniformity) : 炉内位置ごとの温度差(± °C)。小さいほど品質均一、設備精度要求↑。',
+     '昇温・冷却速度 (Heating/Cooling Rate) : 毎分上げ下げする温度(°C/min)。製品品質と炉長・冷却部容量を左右。',
+     '処理量 (Throughput) : 時間・日単位の生産量(kg/day等)。炉サイズと生産能力を決定する重要値。'],
    s1:'1. 顧客情報', s2:'2. 用途・処理対象物', s3:'3. プロセス条件', s4:'4. 処理量・運転', s5:'5. 熱源・付帯設備', s6:'参考予算（非確定）',
    s7:'6. 設置環境', s8:'7. 自動化・工程管理', s9:'8. 安全・環境・認証', s10:'9. 保守・経済性・拡張',
    f:{company:'会社名',person:'担当者',phone:'連絡先',email:'E-mail',purpose:'プロセス目的',material:'処理対象物質',form:'材料形状',density:'かさ比重',hazard:'可燃性・爆発危険性',
@@ -735,6 +763,11 @@ function renderResult(lang){
   B.push(block(t.s9,[[f.exproof,tv(D.exproof,lang)],[f.antistatic,tv(D.antistatic,lang)],[f.cert,D.cert]],lang));
   B.push(block(t.s10,[[f.budget,D.budget],[f.roi,D.roi],[f.maintint,D.maintint],[f.scaleup,D.scaleup],[f.etc,D.etc]],lang));
   document.getElementById('r_body').innerHTML=B.join('');
+  const termsHtml=t.terms.map(x=>{
+    const i=x.indexOf(':');
+    return i>0? `<li><b>${x.slice(0,i).trim()}</b> :${x.slice(i+1)}</li>` : `<li>${x}</li>`;
+  }).join('');
+  document.getElementById('r_terms').innerHTML=`<div class="terms"><div class="hd">${t.termsTitle}</div><ul>${termsHtml}</ul></div>`;
   document.getElementById('r_warn').innerHTML='';
   document.getElementById('r_warn').style.display='none';
   document.getElementById('b_edit').textContent=t.edit;
