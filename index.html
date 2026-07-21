@@ -95,6 +95,7 @@
     body{background:#fff;} .card{border:none; box-shadow:none; padding:0;}
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <header>
@@ -458,7 +459,7 @@
     <div class="btns noprint">
       <button class="prev" onclick="go(7)" id="b_edit"></button>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="prev" onclick="printPDF()" id="b_print"></button>
+        <button class="prev" onclick="downloadFormPDF()" id="b_pdf"></button>
         <button class="prev" onclick="copySpec()" id="b_copy"></button>
         <button class="next" onclick="mailSpec()" id="b_mail"></button>
       </div>
@@ -528,8 +529,8 @@ const L={
       budget:'예산·납기',roi:'기대 ROI 기간',maintint:'유지보수 주기',scaleup:'확장 계획',etc:'기타 요청',refcase:'참고 사례'},
    tbd:'TBD — 협의 필요', ok:'확정', none:'선택 없음', autoAdd:'시스템 자동 추가', recSuffix:'입력값 기반 추천',
    warn:'<b>※ 참고 예산에 대한 안내</b><br>본 화면의 예산 범위는 과거 유사 프로젝트의 예산 견적(Budgetary Quotation) 사례를 참고한 <b>비확정 참고치</b>입니다. 정식 견적은 제작사 기술 검토 후 제공되며, 발주 시기·프로젝트 로드·히터 납기에 따라 변동될 수 있습니다. 기본 납기는 약 12개월(일본 제작 기준)입니다.',
-   edit:'← 수정', print:'인쇄 / PDF 저장', copy:'사양서 텍스트 복사', hint:'선택한 언어로 인쇄/PDF 저장됩니다',
-   mail:'검토 요청 보내기', contact:'담당자: 이제영 부장 (jy.lee@krst.co.kr) — 아래 버튼을 누르면 사양서 내용이 담긴 메일 작성창이 열립니다.', mailSubj:'[견적 사양 검토 요청] ', mailCut:'\n...(본문 길이 제한으로 일부 생략 — 전체 내용은 "사양서 텍스트 복사" 후 붙여넣어 주세요)',
+   edit:'← 수정', pdf:'양식 PDF 다운로드', copy:'사양서 텍스트 복사', hint:'선택한 언어로 PDF가 생성됩니다',
+   mail:'검토 요청 보내기', contact:'담당자: 이제영 부장 (jy.lee@krst.co.kr) — "검토 요청 보내기"를 누르면 사양검토서 PDF가 다운로드되고 메일 작성창이 열립니다. 다운로드된 PDF 파일을 첨부해 보내주세요.', mailSubj:'[견적 사양 검토 요청] ', mailBody:'안녕하세요.\n첨부한 사양검토서(PDF)를 검토 부탁드립니다.\n\n※ 방금 다운로드된 PDF 파일을 이 메일에 첨부해 주세요. (브라우저 다운로드 폴더에 저장되어 있습니다.)', mailCut:'',
    copied:'사양서 텍스트가 복사되었습니다.\n메일 본문에 붙여넣어 발송하실 수 있습니다.',
    etypeRecNote:' 형식으로 1차 검토를 제안합니다. 소요 체류시간과 충진율에 따라 최종 확정됩니다.',
    recs:{
@@ -564,8 +565,8 @@ const L={
       budget:'Budget / Timeline',roi:'Expected ROI Period',maintint:'Maintenance Interval',scaleup:'Scale-Up Plan',etc:'Additional Remarks',refcase:'Reference Case'},
    tbd:'TBD — to be discussed', ok:'Confirmed', none:'None selected', autoAdd:'auto-added by system', recSuffix:'recommended from inputs',
    warn:'<b>* Note on budget reference</b><br>The budget range shown is a <b>non-binding reference</b> based on budgetary quotation cases of similar past projects. A formal quotation will be provided after the manufacturer\'s technical review, and may vary depending on order timing, project load, and heater lead time. Standard delivery is approx. 12 months (manufactured in Japan).',
-   edit:'← Edit', print:'Print / Save as PDF', copy:'Copy spec text', hint:'Prints / saves PDF in the selected language',
-   mail:'Send Review Request', contact:'Contact: J.Y. Lee (jy.lee@krst.co.kr) — the button below opens an e-mail draft containing this spec sheet.', mailSubj:'[Spec Review Request] ', mailCut:'\n...(truncated due to e-mail body length limit — please paste the full text using "Copy spec text")',
+   edit:'← Edit', pdf:'Download Form PDF', copy:'Copy spec text', hint:'Generates a PDF in the selected language',
+   mail:'Send Review Request', contact:'Contact: J.Y. Lee (jy.lee@krst.co.kr) — clicking "Send Review Request" downloads the specification PDF and opens an e-mail draft. Please attach the downloaded PDF and send.', mailSubj:'[Spec Review Request] ', mailBody:'Hello,\nPlease review the attached specification sheet (PDF).\n\n* Please attach the PDF that was just downloaded to this e-mail (saved in your browser download folder).', mailCut:'',
    copied:'Specification text copied.\nYou can paste it into an e-mail.',
    etypeRecNote:' type is proposed for initial review. Final selection depends on residence time and filling rate.',
    recs:{
@@ -600,8 +601,8 @@ const L={
       budget:'予算・納期',roi:'投資回収(ROI)期間',maintint:'保守周期',scaleup:'拡張計画',etc:'その他要望',refcase:'参考事例'},
    tbd:'TBD — 要協議', ok:'確定', none:'選択なし', autoAdd:'システム自動追加', recSuffix:'入力値に基づく推奨',
    warn:'<b>※ 参考予算について</b><br>本画面の予算範囲は、過去の類似プロジェクトの予算見積（Budgetary Quotation）事例を参考にした<b>非確定の参考値</b>です。正式見積はメーカー技術検討後に提供され、発注時期・プロジェクト負荷・ヒーター納期により変動する可能性があります。標準納期は約12ヶ月（日本製作基準）です。',
-   edit:'← 修正', print:'印刷 / PDF保存', copy:'仕様テキストをコピー', hint:'選択した言語で印刷・PDF保存されます',
-   mail:'検討依頼を送信', contact:'担当者: J.Y. Lee (jy.lee@krst.co.kr) — 下のボタンで本仕様書を本文に含むメール作成画面が開きます。', mailSubj:'[仕様検討依頼] ', mailCut:'\n...(メール本文の長さ制限により一部省略 — 全文は「仕様テキストをコピー」で貼り付けてください)',
+   edit:'← 修正', pdf:'様式PDFダウンロード', copy:'仕様テキストをコピー', hint:'選択した言語でPDFが生成されます',
+   mail:'検討依頼を送信', contact:'担当者: J.Y. Lee (jy.lee@krst.co.kr) — 「検討依頼を送信」を押すと仕様検討書PDFがダウンロードされ、メール作成画面が開きます。ダウンロードされたPDFを添付して送信してください。', mailSubj:'[仕様検討依頼] ', mailBody:'お世話になっております。\n添付の仕様検討書（PDF）のご確認をお願いいたします。\n\n※ 先ほどダウンロードされたPDFファイルを本メールに添付してください（ブラウザのダウンロードフォルダに保存されています）。', mailCut:'',
    copied:'仕様書テキストをコピーしました。\nメール本文に貼り付けて送信できます。',
    etypeRecNote:' 形式での一次検討を提案します。滞留時間と充填率により最終確定します。',
    recs:{
@@ -775,7 +776,7 @@ function renderResult(lang){
   document.getElementById('r_warn').innerHTML='';
   document.getElementById('r_warn').style.display='none';
   document.getElementById('b_edit').textContent=t.edit;
-  document.getElementById('b_print').textContent=t.print;
+  document.getElementById('b_pdf').textContent=t.pdf;
   document.getElementById('b_copy').textContent=t.copy;
   document.getElementById('b_mail').textContent=t.mail;
   document.getElementById('r_contact').innerHTML=t.contact;
@@ -791,22 +792,138 @@ function renderResult(lang){
   specText+=document.getElementById('r_warn').textContent+'\n';
 }
 
-function printPDF(){
-  const names={ko:'KRST_사양검토서',en:'KRST_Spec_Review_Sheet',ja:'KRST_仕様検討書'};
-  const old=document.title;
-  document.title=names[curLang]+'_'+new Date().toISOString().slice(0,10);
-  window.print();
-  document.title=old;
-}
 function copySpec(){
   navigator.clipboard.writeText(specText).then(()=>alert(L[curLang].copied));
+}
+
+/* ===== Word 양식 레이아웃 PDF 생성 ===== */
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fv(v){return (v!==null&&v!==undefined&&String(v).trim()!=='')? esc(v) : '<span style="color:#b9c0c9">TBD</span>';}
+function cb(on,label){return `<span style="margin-right:16px; white-space:nowrap; ${on?'font-weight:700;color:#1a2f4e;':'color:#556;'}">${on?'☑':'☐'} ${esc(label)}</span>`;}
+function buildFormHtml(){
+  const d=D||{};
+  const A=d.atmo||[], O=d.options||[];
+  const has=(arr,kw)=>arr.some(x=>x.includes(kw));
+  const P=d.purpose||'', E=d.etype||'', PM=d.prodmode||'', H=d.heat||'', AL=d.autolevel||'', HD=d.handling||'', LI=d.lineint||'';
+  const isCarb=P.includes('탄화'), isSint=P.includes('소성'), isCalc=P.includes('가소'),
+        isOther=!!P&&!isCarb&&!isSint&&!isCalc;
+  const gasTxt=(d.gasflow||'')+(has(A,'수증기')?(d.gasflow?' / ':'')+'수증기(Steam) 분위기 요구':'');
+  const coolTxt=(d.cooling||'')+(d.coolingspec?' ('+d.coolingspec+')':'');
+  const envGas=O.filter(o=>/재연소로|백필터|스크러버/.test(o)).join(', ');
+  const today=new Date().toISOString().slice(0,10);
+  // styles (inline for html2canvas 안정성)
+  const S={
+    wrap:'font-family:\'Malgun Gothic\',\'Yu Gothic\',sans-serif; color:#1c2530; width:100%; padding:6px 10px 14px; box-sizing:border-box;',
+    h1:'font-size:16px; font-weight:800; color:#12233c; text-align:center; margin:2px 0 2px;',
+    h2:'font-size:12px; font-weight:700; color:#12233c; text-align:center; margin:0 0 10px;',
+    meta:'font-size:9.5px; color:#7a8794; text-align:center; margin-bottom:12px;',
+    sec:'font-size:11.5px; font-weight:800; color:#fff; background:#1a2f4e; padding:6px 10px; margin:12px 0 0; border-radius:3px 3px 0 0;',
+    sub:'font-size:10px; font-weight:700; color:#26436e; background:#eef2f8; padding:4px 10px; border-bottom:1px solid #d9dfe8;',
+    tbl:'width:100%; border-collapse:collapse; table-layout:fixed;',
+    tdL:'width:34%; font-size:9.7px; color:#3a4653; background:#f5f7fa; border:1px solid #cdd4de; padding:5px 8px; vertical-align:top;',
+    tdV:'font-size:9.7px; color:#1c2530; border:1px solid #cdd4de; padding:5px 8px; vertical-align:top; word-break:break-word;'
+  };
+  const row=(l,v)=>`<tr><td style="${S.tdL}">${l}</td><td style="${S.tdV}">${v}</td></tr>`;
+  const sec=(title,rowsHtml,subs)=>`<div style="page-break-inside:avoid; margin-bottom:2px;"><div style="${S.sec}">${title}</div>${subs?subs:''}<table style="${S.tbl}">${rowsHtml}</table></div>`;
+  let html=`<div style="${S.wrap}">`;
+  html+=`<div style="${S.h1}">Heat Treatment Equipment</div><div style="${S.h2}">Technical Specification Inquiry Form / 열처리 장비 사양 검토 요청서</div>`;
+  html+=`<div style="${S.meta}">KRST · 자동 생성 사양검토서 · ${today}</div>`;
+  // 1 고객정보
+  html+=sec('1. Customer Information / 고객 기본 정보',
+    row('Company Name / 회사명',fv(d.company))+
+    row('Contact Person / 담당자',fv(d.person))+
+    row('Contact Number / 연락처',fv(d.phone))+
+    row('E-mail / 이메일',fv(d.email))+
+    row('Inquiry Date / 문의 일자',esc(today)));
+  // 2 적용분야·목적
+  html+=sec('2. Application &amp; Purpose / 적용 분야 및 목적',
+    row('Target Material / 처리 대상 물질 [필수]',fv(d.material))+
+    row('Process Type / 공정 목적 구분',cb(isSint,'Sintering(소성)')+cb(isCalc,'Calcination(가소)')+cb(isCarb,'Carbonization(탄화)')+cb(isOther,'Other(기타)'))+
+    row('Specific Purpose / 구체적 공정 목적',fv(isOther?d.purpose:null)));
+  // 3 물질특성
+  html+=sec('3. Material Properties / 처리 물질 특성',
+    row('Material Type &amp; Form / 재료 종류 및 형상 [필수]',fv(d.form))+
+    row('Bulk Density / 체적 비중 (g/cm³)',fv(d.density?d.density+' g/cm³':null))+
+    row('Flammability / Explosion Risk / 가연성·폭발 위험성 [필수]',fv(d.hazard)));
+  // 4 공정조건
+  const t41='Max. Operating Temperature / 최고 공정 온도 (°C) [필수]';
+  const s4=sec('4. Process Conditions / 공정 조건',
+    row(t41,fv(d.maxtemp?d.maxtemp+' °C':null))+
+    row('Soaking Time at Peak / 최고온도 유지 시간 [필수]',fv(d.soak?d.soak+' hr':null))+
+    row('Temperature Uniformity / 요구 온도 편차 (± °C)',fv(d.tempunif))+
+    row('Heating / Cooling Rate / 승온·냉각 속도',fv(d.rate))+
+    row('Atmosphere Type / 분위기 조건 구분 [필수]',cb(has(A,'대기'),'Air(대기)')+cb(has(A,'불활성'),'Inert(불활성)')+cb(has(A,'환원'),'Reducing(환원)')+cb(has(A,'진공'),'Vacuum(진공)'))+
+    row('Process Gas &amp; Purity / 분위기 가스 및 순도',fv(gasTxt))+
+    row('Vacuum Level Required / 진공 도달 요구 사양',fv(d.vacuum))+
+    row('Equipment Type / 장비 형태 [필수]',cb(E.includes('연속'),'Continuous(연속식)')+cb(E.includes('배치'),'Batch(배치식)'))+
+    row('Production Mode / 생산 모드',cb(PM.includes('24'),'24h Continuous')+cb(PM.includes('2교대'),'2-Shift')+cb(PM.includes('1교대'),'1-Shift'))+
+    row('Chamber / Muffle Size / 유효 처리 공간',fv(d.chamber))+
+    row('Loading Capacity per Batch / 배치당 처리 용량',fv(d.loadcap))+
+    row('Required Throughput / 목표 처리량 [필수]',fv(d.throughput))+
+    row('Annual Operating Days / 가동 시간·연간 가동 일수',fv(d.ophours)));
+  html+=s4;
+  // 5 장비사양
+  html+=sec('5. Equipment Specifications / 장비 사양 요구사항',
+    row('Heat Source / 열원 종류 [필수]',cb(H.includes('전기'),'Electric(전기)')+cb(H.includes('가스'),'Gas(가스)'))+
+    row('Power Supply / 전원 사양',fv(d.power))+
+    row('Energy Consumption Target / 에너지 소비 목표',fv(d.energy))+
+    row('Heat Recovery / 열 회수 시스템',cb(has(O,'폐열회수'),'Required')+cb(!has(O,'폐열회수'),'Not Required / Under Review'))+
+    row('Installation Site / 설치 위치·공간',fv(d.site))+
+    row('Available Floor Area / 가용 설치 면적 (m²)',fv(d.area))+
+    row('Exhaust / Ventilation / 배기·환기 설비 현황',fv(d.exhaust))+
+    row('Cooling Utility / 냉각 유틸리티',fv(coolTxt)));
+  // 6 자동화
+  html+=sec('6. Automation &amp; Process Control / 자동화 및 공정 관리',
+    row('Automation Level / 자동화 수준',cb(AL.includes('수동'),'Manual')+cb(AL.includes('반자동'),'Semi-Auto')+cb(AL.includes('전자동'),'Fully Auto'))+
+    row('Material In/Out Handling / 소재 투입·배출 방식',cb(HD.includes('자동'),'Automatic')+cb(HD.includes('수동'),'Manual'))+
+    row('Line Integration / 라인 연계 구분',cb(LI.includes('단독'),'Standalone(신규 단독)')+cb(LI.includes('연계'),'Integrate w/ existing line'))+
+    row('Temperature Monitoring &amp; Data Logging / 온도 모니터링·기록',fv(d.tempmon))+
+    row('Remote Monitoring &amp; Control / 원격 모니터링',cb(has(O,'원격'),'Required')+cb(!has(O,'원격'),'Not Required'))+
+    row('Alarm &amp; Safety Interlock / 경보·인터록',fv(d.alarm)));
+  // 7 안전·환경
+  html+=sec('7. Safety &amp; Environmental Requirements / 안전 및 환경 요구사항',
+    row('Hazardous Gas Handling / 유해 가스 처리 방법',fv(envGas||null))+
+    row('Explosion-Proof Requirements / 방폭 요구사항',fv(d.exproof))+
+    row('Static Electricity Control / 정전기 방지 요구사항',fv(d.antistatic))+
+    row('Required Certifications / 적용 법규·취득 필요 인증',fv(d.cert)));
+  // 8 유지보수 / 9 경제성 / 10 확장
+  html+=sec('8. Maintenance / 유지보수',
+    row('Expected Maintenance Interval / 예상 정기 유지보수 주기',fv(d.maintint)));
+  html+=sec('9. Project Economics &amp; Timeline / 프로젝트 경제성 및 일정',
+    row('Investment Budget / Timeline / 투자 예산 범위·납기 목표',fv(d.budget))+
+    row('Expected ROI Period / 기대 투자 회수 기간',fv(d.roi)));
+  html+=sec('10. Future Scalability / 향후 확장 계획',
+    row('Production Scale-Up Plan / 생산량 증대 계획',fv(d.scaleup)));
+  html+=sec('11. Additional Remarks / 기타 요청',
+    row('Additional Requirements / 기타 특이사항 및 요청',fv(d.etc)));
+  html+=`<div style="font-size:8.5px; color:#8a97a4; margin-top:10px;">※ 잘 모르는 항목은 'TBD(미정)'로 표기되어 있습니다. 당사가 함께 검토해 드립니다. · 담당자: 이제영 부장 (jy.lee@krst.co.kr)</div>`;
+  html+='</div>';
+  return html;
+}
+function downloadFormPDF(cb){
+  if(!D){ buildResult(); }
+  if(typeof html2pdf==='undefined'){ alert('PDF 생성 도구를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. (임시로 "사양서 텍스트 복사"를 이용하실 수 있습니다.)'); if(cb)cb(false); return; }
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed; left:-9999px; top:0; width:780px; background:#fff;';
+  wrap.innerHTML=buildFormHtml();
+  document.body.appendChild(wrap);
+  const co=(D&&D.company)? D.company.replace(/[^\w가-힣]+/g,'_') : 'KRST';
+  const fname=co+'_Spec_Inquiry_Form_'+new Date().toISOString().slice(0,10)+'.pdf';
+  html2pdf().set({margin:[8,7,8,7], filename:fname, image:{type:'jpeg',quality:0.97},
+    html2canvas:{scale:2, useCORS:true, backgroundColor:'#ffffff'},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}, pagebreak:{mode:['css','legacy']}})
+    .from(wrap.firstElementChild).save()
+    .then(()=>{ document.body.removeChild(wrap); if(cb)cb(true); })
+    .catch(()=>{ if(wrap.parentNode)document.body.removeChild(wrap); alert('PDF 생성 중 오류가 발생했습니다.'); if(cb)cb(false); });
 }
 function mailSpec(){
   const t=L[curLang];
   const subj=t.mailSubj+((D&&D.company)?D.company:'');
-  let body=specText;
-  if(body.length>1500) body=body.slice(0,1500)+t.mailCut;
-  location.href='mailto:jy.lee@krst.co.kr?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  downloadFormPDF(function(){
+    setTimeout(function(){
+      location.href='mailto:jy.lee@krst.co.kr?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(t.mailBody);
+    }, 900);
+  });
 }
 </script>
 </body>
