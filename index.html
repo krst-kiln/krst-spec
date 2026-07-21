@@ -11,8 +11,8 @@
 <meta name="description" content="열처리 설비 사양을 선택하면 견적 사양검토서가 자동 완성됩니다.">
 <style>
   :root{
-    --navy:#c4161c; --navy2:#9e1117; --accent:#c4161c; --bg:#f5f6f8;
-    --line:#e0dcdc; --txt:#22242a; --sub:#6a6d75; --ok:#1d7a4f; --warn:#b3541e; --card:#ffffff;
+    --navy:#a3454a; --navy2:#8a383d; --accent:#a3454a; --bg:#f6f5f5;
+    --line:#e3dedd; --txt:#2a2626; --sub:#6f6a6a; --ok:#1d7a4f; --warn:#b3541e; --card:#ffffff;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{font-family:"Segoe UI","Malgun Gothic","Yu Gothic",sans-serif; background:var(--bg); color:var(--txt); line-height:1.55;}
@@ -827,8 +827,8 @@ function buildFormHtml(){
     h1:'font-size:16px; font-weight:800; color:#12233c; text-align:center; margin:2px 0 2px;',
     h2:'font-size:12px; font-weight:700; color:#12233c; text-align:center; margin:0 0 10px;',
     meta:'font-size:9.5px; color:#7a8794; text-align:center; margin-bottom:12px;',
-    sec:'font-size:11.5px; font-weight:800; color:#fff; background:#c4161c; padding:6px 10px; margin:12px 0 0; border-radius:3px 3px 0 0;',
-    sub:'font-size:10px; font-weight:700; color:#9e1117; background:#fbecec; padding:4px 10px; border-bottom:1px solid #e6d3d3;',
+    sec:'font-size:11.5px; font-weight:800; color:#fff; background:#a3454a; padding:6px 10px; margin:12px 0 0; border-radius:3px 3px 0 0;',
+    sub:'font-size:10px; font-weight:700; color:#8a383d; background:#f6eded; padding:4px 10px; border-bottom:1px solid #e8dcdc;',
     tbl:'width:100%; border-collapse:collapse; table-layout:fixed;',
     tdL:'width:34%; font-size:9.7px; color:#3a4653; background:#f5f7fa; border:1px solid #cdd4de; padding:5px 8px; vertical-align:top;',
     tdV:'font-size:9.7px; color:#1c2530; border:1px solid #cdd4de; padding:5px 8px; vertical-align:top; word-break:break-word;'
@@ -836,8 +836,8 @@ function buildFormHtml(){
   const row=(l,v)=>`<tr style="page-break-inside:avoid;"><td style="${S.tdL}">${l}</td><td style="${S.tdV}">${v}</td></tr>`;
   const sec=(title,rowsHtml,subs)=>`<div style="margin-bottom:3px;"><div style="${S.sec} page-break-after:avoid;">${title}</div>${subs?subs:''}<table style="${S.tbl}">${rowsHtml}</table></div>`;
   let html=`<div style="${S.wrap}">`;
-  html+=`<div style="text-align:center; font-size:26px; font-weight:800; letter-spacing:1px; color:#c4161c; line-height:1;">KRST<sup style="font-size:10px;">®</sup></div>`;
-  html+=`<div style="text-align:center; font-size:10px; font-weight:700; color:#c4161c; margin:1px 0 6px;">Kiln 사업부</div>`;
+  html+=`<div style="text-align:center; font-size:26px; font-weight:800; letter-spacing:1px; color:#a3454a; line-height:1;">KRST<sup style="font-size:10px;">®</sup></div>`;
+  html+=`<div style="text-align:center; font-size:10px; font-weight:700; color:#a3454a; margin:1px 0 6px;">Kiln 사업부</div>`;
   html+=`<div style="${S.h1}">Heat Treatment Equipment</div><div style="${S.h2}">Technical Specification Inquiry Form / 열처리 장비 사양 검토 요청서</div>`;
   html+=`<div style="${S.meta}">KRST · 자동 생성 사양검토서 · ${today}</div>`;
   // 1 고객정보
